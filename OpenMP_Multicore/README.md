@@ -35,6 +35,27 @@ ctest --output-on-failure
 
 O teste usa uma malha 12 × 19 e um único passo físico com dois limites de iteração. Compare os campos com a versão CUDA para validar equivalência numérica no seu ambiente; diferenças pequenas por ordem de operações de ponto flutuante são esperadas. O código CUDA original permanece em `../c_cuda`. O script `convert.py` registra o processo de conversão, mas os arquivos `.cpp` resultantes já fazem parte do projeto.
 
+## Comparar numericamente com CUDA
+
+Execute as duas versões com `imax=12`, `itc_max=2` e os mesmos arquivos de `tests/smoke/input/`. Use pastas de trabalho distintas, pois ambas escrevem `data/output_variables.dat` e `data/restart/*.dat`. O executável já existente `../c_cuda/cylinder_solver.out` é Linux ELF; rode em Linux ou WSL com GPU CUDA. Confirme que ele foi compilado da mesma revisão do código CUDA antes de usá-lo como referência.
+
+No Linux/WSL, a partir da raiz do repositório:
+
+```sh
+mkdir -p OpenMP_Multicore/validation/cuda/input OpenMP_Multicore/validation/cuda/data/restart
+cp OpenMP_Multicore/tests/smoke/input/*.dat OpenMP_Multicore/validation/cuda/input/
+cd OpenMP_Multicore/validation/cuda
+../../../c_cuda/cylinder_solver.out 12 2
+```
+
+Rode a versão OpenMP em `OpenMP_Multicore/tests/smoke` conforme a seção anterior. Depois, na raiz do repositório:
+
+```sh
+python OpenMP_Multicore/tests/compare_outputs.py OpenMP_Multicore/validation/cuda OpenMP_Multicore/tests/smoke
+```
+
+O comparador verifica o mesmo número de linhas, rejeita `NaN`/infinito e mostra o erro máximo e RMS de `x`, `y`, `u`, `v`, `p`, `T`, `C` e dos campos de reinício. O critério padrão é `|CUDA − OpenMP| <= 2e-6 + 1e-5 * max(|CUDA|, |OpenMP|)` por valor. A saída usa seis casas decimais, por isso uma comparação exata de ponto flutuante não é apropriada. Ajuste com `--atol` e `--rtol` e registre os valores escolhidos. Um resultado `EQUIVALENTES dentro das tolerancias` com código de saída zero atesta equivalência para **esse caso de teste e essas tolerâncias**. Repita com mais passos e tamanhos de malha para ampliar a validação.
+
 ## Organização
 
 - `comum.*` e `functions.h`: estado compartilhado e interfaces do solver.

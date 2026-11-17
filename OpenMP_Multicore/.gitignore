@@ -1,0 +1,8 @@
+build/
+validation/
+*.exe
+data/*.dat
+data/restart/*.dat
+transient/data/*.dat
+tests/smoke/data/*.dat
+tests/smoke/data/restart/*.dat
