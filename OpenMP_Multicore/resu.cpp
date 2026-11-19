@@ -8,6 +8,8 @@ void calc_resu(dim3 grid, dim3 block, double *dev_areau_e, double *dev_areau_n, 
 
     int i = tid_x + 3;
     int j = tid_y + 3;
+    // Descarta pontos extras antes de qualquer acesso às matrizes.
+    if (i > imax-1 || j > jmax-2) return;
 	int idx = i*(jmax+1)+j;
 	double df, dn, ds, de, dw;
 	double fn, fs, fe, fw;

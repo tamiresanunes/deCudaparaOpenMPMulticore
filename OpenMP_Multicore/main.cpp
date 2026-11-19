@@ -184,17 +184,18 @@ int main(int argc, char *argv[]){
     //--- Create mesh ---
     mesh();
 
-    double x0=0.0, xN=0.0, y0=0.0, yN=0.0, flag0=0.0, eps0=0.0, lig0=0.0;
+    double x0=0.0, xN=0.0, y0=0.0, yN=0.0, eps0=0.0, lig0=0.0;
     cpuMemcpy(&x0, dev_x + 1, sizeof(double));
     cpuMemcpy(&xN, dev_x + imax, sizeof(double));
     cpuMemcpy(&y0, dev_y + 1, sizeof(double));
     cpuMemcpy(&yN, dev_y + jmax, sizeof(double));
+    int flag0 = 0;
     cpuMemcpy(&flag0, dev_flag + 1, sizeof(int));
     int flag_mid = 0;
     cpuMemcpy(&flag_mid, dev_flag + mid_idx, sizeof(int));
     cpuMemcpy(&eps0, dev_epsilon1 + mid_idx, sizeof(double));
     cpuMemcpy(&lig0, dev_liga_poros + mid_idx, sizeof(double));
-    printf("MESH_CHECK imax=%d jmax=%d x1=%.12g xN=%.12g y1=%.12g yN=%.12g flag1=%g flag_mid=%d eps_mid=%.12g lig_mid=%.12g\n", imax, jmax, x0, xN, y0, yN, flag0, flag_mid, eps0, lig0);
+    printf("MESH_CHECK imax=%d jmax=%d x1=%.12g xN=%.12g y1=%.12g yN=%.12g flag1=%d flag_mid=%d eps_mid=%.12g lig_mid=%.12g\n", imax, jmax, x0, xN, y0, yN, flag0, flag_mid, eps0, lig0);
     for(int k=1; k<=5; ++k){
         double xx=0.0, yy=0.0; cpuMemcpy(&xx, dev_x + k, sizeof(double)); cpuMemcpy(&yy, dev_y + k, sizeof(double)); printf("MESH_SAMPLE k=%d x=%.12g y=%.12g\n", k, xx, yy);
     }

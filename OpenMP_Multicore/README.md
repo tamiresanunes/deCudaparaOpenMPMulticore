@@ -66,3 +66,14 @@ O comparador verifica o mesmo número de linhas, rejeita `NaN`/infinito e mostra
 - `tests/smoke`: configuração mínima para verificar compilação e um passo.
 
 As matrizes ainda usam os nomes `dev_*` herdados do original para facilitar a comparação fórmula a fórmula; são vetores comuns da CPU.
+
+## Bateria de estresse OpenMP
+
+No PowerShell, a partir da raiz do repositório, compile e execute:
+
+```powershell
+.\OpenMP_Multicore\build.ps1
+python .\OpenMP_Multicore\tests\run_stress.py --timeout 120 --max-grid 512
+```
+
+O roteiro cria casos independentes em `build/stress_runs/`, força `start_mode=0` e testa malhas 24, 128, 256 e 384; 1, 2 e 4 threads; tempos finais 0.005, 0.025 e 0.05; e `itc_max` de 2, 5 e 10. Em seguida tenta uma escada de malhas de 320 até `--max-grid`, parando no primeiro problema. `summary.csv` registra duração, código de saída, linhas, extremos de temperatura e concentração e maiores magnitudes. `stdout.log` e `stderr.log` ficam na pasta de cada caso. `PASS` exige saída completa e finita. `UNSTABLE` é um alerta conservador para este fixture: temperatura fora de `[0, 2]` ou concentração fora de `[-0.1, 1.1]`. A temperatura inicial é 1 e a concentração inicial está entre 0 e 1. `CRASH`, `BAD_OUTPUT` e `TIMEOUT` são resultados distintos. O limite observado depende da máquina, dos dados e do prazo por caso. `--smoke` roda apenas os dois casos pequenos, e `--max-grid 1024` estende a escada. Este teste não demonstra convergência física da solução.

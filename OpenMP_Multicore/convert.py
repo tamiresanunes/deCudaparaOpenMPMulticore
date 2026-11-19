@@ -80,6 +80,10 @@ def convert(code, name):
     if name == "main":
         code = re.sub(r"\s*// NOTA: Este código usa Unified Memory.*?time_h2d = 0\.0f;", "\n        // Não há transferência host/dispositivo na versão multicore.\n        time_h2d = 0.0f;", code, flags=re.S)
         code = code.replace("CUDA Events", "Temporizadores OpenMP")
+        # O flag da malha é inteiro; copiar seus bytes para double corrompe o diagnóstico.
+        code = code.replace("flag0=0.0, eps0=0.0", "eps0=0.0")
+        code = code.replace("    cpuMemcpy(&flag0,", "    int flag0 = 0;\n    cpuMemcpy(&flag0,")
+        code = code.replace("flag1=%g", "flag1=%d")
         code = code.replace("float time_h2d, time_d2h, time_timestep;", "float time_timestep;")
         code = "\n".join(line for line in code.split("\n") if not any(
             marker in line for marker in ("ev_h2d", "ev_d2h", "acc_h2d", "acc_d2h",
@@ -97,6 +101,18 @@ def convert(code, name):
     if name == "bcC":
         # O original omitia parênteses e acessava índice negativo no canto direito.
         code = code.replace("imax-1*(jmax+1)", "(imax-1)*(jmax+1)")
+    if name in ("resu", "resv"):
+        # As threads de preenchimento da grade não pertencem ao domínio físico.
+        # Estes kernels calculavam endereços e liam áreas antes do if original.
+        limit = ("imax-1 || j > jmax-2" if name == "resu"
+                 else "imax-2 || j > jmax-1")
+        code = code.replace(
+            "    int j = tid_y + 3;",
+            "    int j = tid_y + 3;\n"
+            "    // Descarta pontos extras antes de qualquer acesso às matrizes.\n"
+            f"    if (i > {limit}) return;",
+            1,
+        )
     return code
 
 

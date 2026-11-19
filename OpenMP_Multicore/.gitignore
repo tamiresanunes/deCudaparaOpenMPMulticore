@@ -6,3 +6,5 @@ data/restart/*.dat
 transient/data/*.dat
 tests/smoke/data/*.dat
 tests/smoke/data/restart/*.dat
+__pycache__/
+tests/__pycache__/
